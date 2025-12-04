@@ -1,0 +1,3 @@
+Remove-Item -Force.yarn.lock
+npm install -verbose
+npm run serve
