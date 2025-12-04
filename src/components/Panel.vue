@@ -83,6 +83,7 @@
 import Two from "two.js";
 import interact from "interactjs";
 import screenfull from "screenfull";
+import { markRaw } from "vue";
 
 export default {
   data() {
@@ -117,7 +118,7 @@ export default {
 
       tool: null,
 
-      two: {},
+      two: null,
     };
   },
 
@@ -158,16 +159,21 @@ export default {
 
   methods: {
     init: function () {
-      this.two = new Two({
+      // Use markRaw to prevent Vue from making Two.js instance reactive
+      // This avoids conflicts with Two.js's private fields
+      this.two = markRaw(new Two({
         type: Two.Types.svg,
         fitted: true,
         autostart: true,
-      }).appendTo(document.getElementById("panel"));
+      }).appendTo(document.getElementById("panel")));
 
       this.mouse = new Two.Vector();
       this.tmp = new Two.Vector();
 
-      this.load_elements();
+      // Wait for next tick to ensure Two.js has proper dimensions
+      this.$nextTick(() => {
+        this.load_elements();
+      });
       this.bind_global_events();
     },
 
