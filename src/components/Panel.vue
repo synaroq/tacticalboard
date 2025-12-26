@@ -1,6 +1,16 @@
 <template>
   <div class="h-full w-full relative">
     <div class="h-full w-full" id="panel"></div>
+    <sequence-recorder
+      ref="sequenceRecorder"
+      @recording-started="onRecordingStarted"
+      @recording-stopped="onRecordingStopped"
+      @playback-started="onPlaybackStarted"
+      @playback-finished="onPlaybackFinished"
+      @playback-paused="onPlaybackPaused"
+      @execute-action="executeAction"
+      @reset-board="resetBoard"
+    />
     <div
       class="
         draggable
@@ -84,8 +94,12 @@ import Two from "two.js";
 import interact from "interactjs";
 import screenfull from "screenfull";
 import { markRaw } from "vue";
+import SequenceRecorder from "./SequenceRecorder.vue";
 
 export default {
+  components: {
+    SequenceRecorder
+  },
   data() {
     return {
       BALL_SCALE: 0.037,
@@ -117,6 +131,8 @@ export default {
       line_color: "#fff",
 
       tool: null,
+      isRecording: false,
+      initialState: null,
 
       two: null,
     };
@@ -224,6 +240,17 @@ export default {
           this.objs[arrow.renderer.elem.id] = arrow;
           this.bind_eraser(arrow.renderer.elem);
           this.bind_drag(arrow.renderer.elem);
+          
+          // Record line drawing if recording is active
+          if (this.isRecording) {
+            this.recordAction({
+              type: 'line_draw',
+              startPoint: { x: this.start_point.x, y: this.start_point.y },
+              endPoint: { x: this.mouse.x, y: this.mouse.y },
+              color: this.line_color,
+              linewidth: this.line_width
+            });
+          }
 
           this.start_point = this.mouse = null;
         }
@@ -266,15 +293,16 @@ export default {
       interact(elem).on("tap", () => {
         if (this.tool == this.TOOLS.ERASER) {
           var line = this.lines[elem.id];
-
-          // console.log("line:", line);
-          // console.log("children before remove", this.two.scene.children);
-          // // try to remove
-          // var res = this.two.remove(line)
-          // console.log("return from remove", res)
-          // console.log("childrena after remove", this.two.scene.children);
-          // console.log("ids", this.two.scene.children.ids)
           line.visible = false;
+          
+          // Record line erasing if recording is active
+          if (this.isRecording) {
+            this.recordAction({
+              type: 'line_erase',
+              lineId: elem.id
+            });
+          }
+          
           delete this.lines[elem.id];
           console.log(this.lines);
         }
@@ -304,7 +332,24 @@ export default {
 
     dragMoveListener: function (event) {
       var obj = this.objs[event.target.id];
-      obj.translation = obj.position.add(new Two.Vector(event.dx, event.dy));
+      var newPosition = obj.position.add(new Two.Vector(event.dx, event.dy));
+      obj.translation = newPosition;
+      
+      // Record the movement if recording is active
+      if (this.isRecording) {
+        var actionType = event.target.id === 'ball' ? 'ball_move' : 'player_move';
+        var actionData = {
+          type: actionType,
+          position: { x: newPosition.x, y: newPosition.y }
+        };
+        
+        if (actionType === 'player_move') {
+          actionData.playerId = event.target.id;
+        }
+        
+        this.recordAction(actionData);
+      }
+      
       event.preventDefault();
     },
 
@@ -415,6 +460,131 @@ export default {
     clear: function () {
       console.log("clear");
       this.two.clear();
+    },
+
+    // Recording and playback methods
+    onRecordingStarted() {
+      this.isRecording = true;
+      this.captureInitialState();
+    },
+
+    onRecordingStopped() {
+      this.isRecording = false;
+    },
+
+    onPlaybackStarted(sequence) {
+      console.log('Playback started for sequence:', sequence.name);
+    },
+
+    onPlaybackFinished() {
+      console.log('Playback finished');
+    },
+
+    onPlaybackPaused() {
+      console.log('Playback paused');
+    },
+
+    executeAction(action) {
+      // Execute the recorded action based on its type
+      switch (action.type) {
+        case 'player_move':
+          this.movePlayerToPosition(action.playerId, action.position);
+          break;
+        case 'ball_move':
+          this.moveBallToPosition(action.position);
+          break;
+        case 'line_draw':
+          this.drawLineFromAction(action);
+          break;
+        case 'line_erase':
+          this.eraseLineFromAction(action);
+          break;
+      }
+    },
+
+    resetBoard() {
+      // Reset all objects to their initial positions
+      if (this.initialState) {
+        this.restoreState(this.initialState);
+      }
+    },
+
+    captureInitialState() {
+      this.initialState = {
+        players: {},
+        ball: this.ball.position.clone(),
+        lines: Object.keys(this.lines)
+      };
+      
+      // Capture player positions
+      for (let playerId in this.players) {
+        this.initialState.players[playerId] = this.players[playerId].position.clone();
+      }
+    },
+
+    restoreState(state) {
+      // Clear all lines
+      for (let lineId in this.lines) {
+        this.lines[lineId].visible = false;
+      }
+      this.lines = {};
+      
+      // Reset player positions
+      for (let playerId in state.players) {
+        if (this.players[playerId]) {
+          this.players[playerId].translation = state.players[playerId];
+        }
+      }
+      
+      // Reset ball position
+      if (this.ball && state.ball) {
+        this.ball.translation = state.ball;
+      }
+      
+      this.two.update();
+    },
+
+    movePlayerToPosition(playerId, position) {
+      if (this.players[playerId]) {
+        this.players[playerId].translation = new Two.Vector(position.x, position.y);
+        this.two.update();
+      }
+    },
+
+    moveBallToPosition(position) {
+      if (this.ball) {
+        this.ball.translation = new Two.Vector(position.x, position.y);
+        this.two.update();
+      }
+    },
+
+    drawLineFromAction(action) {
+      var arrow = this.two.makeArrow(
+        action.startPoint.x,
+        action.startPoint.y,
+        action.endPoint.x,
+        action.endPoint.y
+      );
+      arrow.stroke = action.color;
+      arrow.linewidth = action.linewidth;
+      this.two.update();
+      this.lines[arrow.renderer.elem.id] = arrow;
+      this.objs[arrow.renderer.elem.id] = arrow;
+      this.bind_eraser(arrow.renderer.elem);
+      this.bind_drag(arrow.renderer.elem);
+    },
+
+    eraseLineFromAction(action) {
+      if (this.lines[action.lineId]) {
+        this.lines[action.lineId].visible = false;
+        delete this.lines[action.lineId];
+      }
+    },
+
+    recordAction(actionData) {
+      if (this.isRecording && this.$refs.sequenceRecorder) {
+        this.$refs.sequenceRecorder.recordAction(actionData);
+      }
     },
   },
 

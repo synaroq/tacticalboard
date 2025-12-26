@@ -8,11 +8,11 @@ import './index.css'
 /* import the fontawesome core */
 import { library } from '@fortawesome/fontawesome-svg-core'
 /* import specific icons */
-import { faEraser, faPen, faSave} from '@fortawesome/free-solid-svg-icons'
+import { faEraser, faPen, faSave, faRecordVinyl, faPlay, faPause, faStop, faTrash } from '@fortawesome/free-solid-svg-icons'
 /* import font awesome icon component */
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 /* add icons to the library */
-library.add(faPen, faEraser, faSave)
+library.add(faPen, faEraser, faSave, faRecordVinyl, faPlay, faPause, faStop, faTrash)
 
 const app = createApp(App);
 const head = createHead()
