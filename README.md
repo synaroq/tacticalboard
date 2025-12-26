@@ -2,6 +2,13 @@
 
 Tactical boards on your devices. Make tactical communication convenient.
 
+## How to run
+
+```bash
+npm install
+npm run serve
+```
+
 ## Badminton tactical board
 
 [Open the board Now!](https://tacticalboard.github.io/shuttle)
@@ -19,7 +26,6 @@ Tactical boards on your devices. Make tactical communication convenient.
 [Open the board Now!](https://tacticalboard.github.io/basketball)
 
 ![](src/assets/screenshot/basketball.jpg)
-
 
 ## Packages used
 
