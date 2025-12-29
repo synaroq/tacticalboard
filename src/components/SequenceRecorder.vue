@@ -1,7 +1,10 @@
 <template>
-  <div class="sequence-recorder absolute top-4 left-4 z-30">
+  <div class="sequence-recorder absolute top-4 left-4 z-30" :class="{ minimized: isMinimized }">
+    <button @click="isMinimized = !isMinimized" class="absolute top-1 right-1 bg-gray-800 text-white rounded px-2 py-1 text-xs z-40">
+      {{ isMinimized ? '⤢' : '—' }}
+    </button>
     <!-- Recording Controls -->
-    <div class="bg-gray-700 rounded-lg p-4 shadow-xl">
+    <div v-show="!isMinimized" class="bg-gray-700 rounded-lg p-4 shadow-xl">
       <div class="flex items-center gap-3 mb-3">
         <h3 class="text-white font-semibold">Play Sequences</h3>
         <div
@@ -134,6 +137,7 @@ export default {
   name: "SequenceRecorder",
   data() {
     return {
+      isMinimized: false,
       isRecording: false,
       isPlaying: false,
       currentSequence: {
@@ -304,4 +308,12 @@ export default {
 .animate-pulse {
   animation: pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
+  .sequence-recorder.minimized {
+    width: 40px;
+    min-width: 0;
+    height: 40px;
+    overflow: hidden;
+    background: transparent;
+    box-shadow: none;
+  }
 </style>

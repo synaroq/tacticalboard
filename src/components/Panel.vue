@@ -1,6 +1,10 @@
 <template>
   <div class="h-full w-full relative">
     <div class="h-full w-full" id="panel"></div>
+    <FormationManager
+      :getCurrentFormation="getCurrentFormation"
+      :setFormation="setFormation"
+    />
     <sequence-recorder
       ref="sequenceRecorder"
       @recording-started="onRecordingStarted"
@@ -95,10 +99,12 @@ import interact from "interactjs";
 import screenfull from "screenfull";
 import { markRaw } from "vue";
 import SequenceRecorder from "./SequenceRecorder.vue";
+import FormationManager from "./FormationManager.vue";
 
 export default {
   components: {
-    SequenceRecorder
+    SequenceRecorder,
+    FormationManager
   },
   data() {
     return {
@@ -174,6 +180,37 @@ export default {
   },
 
   methods: {
+    getCurrentFormation() {
+      const players = {};
+      for (let playerId in this.players) {
+        players[playerId] = {
+          x: this.players[playerId].translation.x,
+          y: this.players[playerId].translation.y
+        };
+      }
+      const ball = this.ball ? {
+        x: this.ball.translation.x,
+        y: this.ball.translation.y
+      } : null;
+      return { players, ball };
+    },
+    
+    setFormation(formation) {
+      if (formation && formation.players) {
+        for (let playerId in formation.players) {
+          if (this.players[playerId]) {
+            this.players[playerId].translation.x = formation.players[playerId].x;
+            this.players[playerId].translation.y = formation.players[playerId].y;
+          }
+        }
+      }
+      if (formation && formation.ball && this.ball) {
+        this.ball.translation.x = formation.ball.x;
+        this.ball.translation.y = formation.ball.y;
+      }
+      if (this.two) this.two.update();
+    },
+
     init: function () {
       // Use markRaw to prevent Vue from making Two.js instance reactive
       // This avoids conflicts with Two.js's private fields
