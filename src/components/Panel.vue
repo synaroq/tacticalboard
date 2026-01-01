@@ -440,10 +440,33 @@ export default {
           for (let i of [...Array(this.n_player).keys()]) {
             var player_name = team + "_" + i;
             var player = this.two.interpret(svg);
-            player.id = player_name;
-            this.objs[player.id] = player;
             player.center();
             this.resize_shape(player, this.player_width);
+            player.opacity = this.OPACITY;
+            player.fill = color;
+            player.stroke = "#fff";
+            player.linewidth = Math.min(
+              this.PLAYER_STROKE_RATIO * this.player_width,
+              this.MAX_PLAYER_STROKE
+            );
+            
+            // Add player number text
+            var playerNumber = this.two.makeText(
+              (i + 1).toString(),
+              0,
+              0
+            );
+            playerNumber.size = this.player_width * 0.6;
+            playerNumber.fill = "#fff";
+            playerNumber.weight = "bold";
+            playerNumber.family = "Arial, sans-serif";
+            playerNumber.alignment = "center";
+            playerNumber.baseline = "middle";
+            
+            // Create a group to hold both the player shape and the number
+            var playerGroup = this.two.makeGroup(player, playerNumber);
+            playerGroup.id = player_name;
+            
             var ball_pos = Two.Vector.add(
               this.ball_init_position,
               new Two.Vector(
@@ -453,18 +476,13 @@ export default {
                 0
               )
             );
-            player.translation = ball_pos;
-            player.opacity = this.OPACITY;
-            player.fill = color;
-            player.stroke = "#fff";
-            player.linewidth = Math.min(
-              this.PLAYER_STROKE_RATIO * this.player_width,
-              this.MAX_PLAYER_STROKE
-            );
-            this.players[player_name] = player;
+            playerGroup.translation = ball_pos;
+            
+            this.players[player_name] = playerGroup;
+            this.objs[player_name] = playerGroup;
 
             this.two.update();
-            this.bind_drag(player._renderer.elem);
+            this.bind_drag(playerGroup._renderer.elem);
           }
         }
       });
