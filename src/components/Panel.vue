@@ -457,7 +457,7 @@ export default {
               0
             );
             playerNumber.size = this.player_width * 0.6;
-            playerNumber.fill = "#fff";
+            playerNumber.fill = "#000";
             playerNumber.weight = "bold";
             playerNumber.family = "Arial, sans-serif";
             playerNumber.alignment = "center";
