@@ -19,7 +19,7 @@
 
 = Introduction
 
-L'application Tableau Tactique a été enrichie de deux nouvelles fonctionnalités majeures qui améliorent considérablement son utilité pour l'entraînement sportif : l'Enregistreur de Séquences et le Gestionnaire de Formations.
+L'application Tableau Tactique a été enrichie de trois nouvelles fonctionnalités majeures qui améliorent considérablement son utilité pour l'entraînement sportif : l'Enregistreur de Séquences, le Gestionnaire de Formations, et la Numérotation des Joueurs.
 
 = 1. Enregistreur de Séquences
 
@@ -60,6 +60,26 @@ L'enregistreur de séquences permet aux entraîneurs d'enregistrer les mouvement
 3. Cliquer sur "Save" pour sauvegarder
 4. Utiliser le menu déroulant pour sélectionner une formation sauvegardée
 5. Cliquer sur "Load" pour appliquer la formation
+
+= 3. Numérotation des Joueurs
+
+== Fonctionnalité
+
+Chaque joueur affiche désormais un numéro en noir au centre du cercle qui le représente. Cette numérotation facilite grandement la communication lors des explications tactiques et permet une identification claire de chaque joueur.
+
+== Caractéristiques principales
+
+- Numérotation automatique : Les joueurs sont numérotés de 1 à N selon le sport
+  - Basketball : numéros 1 à 5 pour chaque équipe
+  - Football : numéros 1 à 11 pour chaque équipe
+  - Shuttle : numéros 1 à 2 pour chaque équipe
+- Lisibilité optimale : Numéros en noir avec police en gras pour un contraste maximal
+- Dimensionnement adaptatif : La taille des numéros s'ajuste automatiquement selon la taille du terrain
+- Persistance : Les numéros restent visibles lors des déplacements et enregistrements
+
+== Implémentation technique
+
+La numérotation est implémentée dans le composant Panel.vue en créant un groupe SVG contenant à la fois le cercle représentant le joueur et le texte du numéro. Cette approche garantit que le numéro reste centré sur le joueur lors de tous les déplacements et manipulations.
 
 = Interface Utilisateur
 
