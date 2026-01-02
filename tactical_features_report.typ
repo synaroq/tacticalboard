@@ -73,17 +73,12 @@ Chaque joueur affiche désormais un numéro en noir au centre du cercle qui le r
   - Basketball : numéros 1 à 5 pour chaque équipe
   - Football : numéros 1 à 11 pour chaque équipe
   - Shuttle : numéros 1 à 2 pour chaque équipe
-- Lisibilité optimale : Numéros en noir avec police en gras pour un contraste maximal
 - Dimensionnement adaptatif : La taille des numéros s'ajuste automatiquement selon la taille du terrain
 - Persistance : Les numéros restent visibles lors des déplacements et enregistrements
 
 == Implémentation technique
 
 La numérotation est implémentée dans le composant Panel.vue en créant un groupe SVG contenant à la fois le cercle représentant le joueur et le texte du numéro. Cette approche garantit que le numéro reste centré sur le joueur lors de tous les déplacements et manipulations.
-
-= Interface Utilisateur
-
-Les deux fonctionnalités sont intégrées dans des panneaux minimisables situés dans les coins de l'écran car nous nous sommes rendu compte qu'elles prenaient trop de place sur l'espace de jeu. cette partie pourrait etre améliorée en terme de design.
 
 
 = Compatibilité
